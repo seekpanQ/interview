@@ -5,8 +5,7 @@ import com.student.score.dto.request.ScoreRecordRequest;
 import com.student.score.dto.request.ScoreRecordUpdateRequest;
 import com.student.score.dto.response.ScoreRecordDTO;
 import com.student.score.entity.CourseInfo;
-import com.student.score.entity.CourseInfoDO;
-import com.student.score.entity.ScoreRecordDO;
+import com.student.score.entity.ScoreRecord;
 import com.student.score.entity.StudentInfo;
 import com.student.score.repository.CourseInfoRepository;
 import com.student.score.repository.ScoreRecordRepository;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,61 +53,61 @@ public class ScoreRecordServiceImpl implements ScoreRecordService {
             throw new IllegalArgumentException("学生或课程不存在");
         }
 
-        ScoreRecordDO scoreRecordDO = new ScoreRecordDO();
-        scoreRecordDO.setStudentId(request.getStudentId());
-        scoreRecordDO.setCourseId(request.getCourseId());
-        scoreRecordDO.setUsualScore(request.getUsualScore());
-        scoreRecordDO.setFinalScore(request.getFinalScore());
-        scoreRecordDO.setTotalScore(calculateTotalScore(request.getUsualScore(), request.getFinalScore(), courseInfo));
-        scoreRecordDO.setCreateBy("admin");
-        scoreRecordDO.setCreateTime(new Date());
+        ScoreRecord scoreRecord = new ScoreRecord();
+        scoreRecord.setStudentId(request.getStudentId());
+        scoreRecord.setCourseId(request.getCourseId());
+        scoreRecord.setUsualScore(request.getUsualScore());
+        scoreRecord.setFinalScore(request.getFinalScore());
+        scoreRecord.setTotalScore(calculateTotalScore(request.getUsualScore(), request.getFinalScore(), courseInfo));
+        scoreRecord.setCreateBy("admin");
+        scoreRecord.setCreateTime(LocalDateTime.now());
 
-        scoreRecordDO = scoreRecordRepository.save(scoreRecordDO);
-        return convertToDTO(scoreRecordDO);
+        scoreRecord = scoreRecordRepository.save(scoreRecord);
+        return convertToDTO(scoreRecord);
     }
 
     @Override
     @Transactional
     public ScoreRecordDTO updateScoreRecord(ScoreRecordUpdateRequest request) {
-        ScoreRecordDO scoreRecordDO = scoreRecordRepository.findById(request.getRecordId()).orElse(null);
+        ScoreRecord scoreRecord = scoreRecordRepository.findById(request.getRecordId()).orElse(null);
 
-        if (scoreRecordDO == null) {
+        if (scoreRecord == null) {
             throw new IllegalArgumentException("成绩记录不存在");
         }
 
-        CourseInfo courseInfo = courseInfoRepository.findById(scoreRecordDO.getCourseId()).orElse(null);
+        CourseInfo courseInfo = courseInfoRepository.findById(scoreRecord.getCourseId()).orElse(null);
 
         if (request.getUsualScore() != null) {
-            scoreRecordDO.setUsualScore(request.getUsualScore());
+            scoreRecord.setUsualScore(request.getUsualScore());
         }
 
         if (request.getFinalScore() != null) {
-            scoreRecordDO.setFinalScore(request.getFinalScore());
+            scoreRecord.setFinalScore(request.getFinalScore());
         }
 
-        scoreRecordDO.setTotalScore(calculateTotalScore(scoreRecordDO.getUsualScore(), scoreRecordDO.getFinalScore(), courseInfo));
-        scoreRecordDO.setUpdateBy("admin");
-        scoreRecordDO.setUpdateTime(new Date());
+        scoreRecord.setTotalScore(calculateTotalScore(scoreRecord.getUsualScore(), scoreRecord.getFinalScore(), courseInfo));
+        scoreRecord.setUpdateBy("admin");
+        scoreRecord.setUpdateTime(LocalDateTime.now());
 
-        scoreRecordDO = scoreRecordRepository.save(scoreRecordDO);
-        return convertToDTO(scoreRecordDO);
+        scoreRecord = scoreRecordRepository.save(scoreRecord);
+        return convertToDTO(scoreRecord);
     }
 
     @Override
     @Transactional
     public void deleteScoreRecord(Integer recordId) {
-        ScoreRecordDO scoreRecordDO = scoreRecordRepository.findById(recordId).orElse(null);
+        ScoreRecord scoreRecord = scoreRecordRepository.findById(recordId).orElse(null);
 
-        if (scoreRecordDO == null) {
+        if (scoreRecord == null) {
             throw new IllegalArgumentException("成绩记录不存在");
         }
 
-        scoreRecordRepository.delete(scoreRecordDO);
+        scoreRecordRepository.delete(scoreRecord);
     }
 
     @Override
     public List<ScoreRecordDTO> getScoreRecordList(ScoreRecordListRequest request) {
-        List<ScoreRecordDO> scoreRecordList = scoreRecordRepository.findByConditions(request.getStudentId(), request.getCourseId());
+        List<ScoreRecord> scoreRecordList = scoreRecordRepository.findByConditions(request.getStudentId(), request.getCourseId());
         return scoreRecordList.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -140,18 +140,18 @@ public class ScoreRecordServiceImpl implements ScoreRecordService {
         return totalScore;
     }
 
-    private ScoreRecordDTO convertToDTO(ScoreRecordDO scoreRecordDO) {
+    private ScoreRecordDTO convertToDTO(ScoreRecord scoreRecord) {
         ScoreRecordDTO scoreRecordDTO = new ScoreRecordDTO();
-        scoreRecordDTO.setRecordId(scoreRecordDO.getRecordId());
-        scoreRecordDTO.setStudentId(scoreRecordDO.getStudentId());
-        scoreRecordDTO.setCourseId(scoreRecordDO.getCourseId());
-        scoreRecordDTO.setUsualScore(scoreRecordDO.getUsualScore());
-        scoreRecordDTO.setFinalScore(scoreRecordDO.getFinalScore());
-        scoreRecordDTO.setTotalScore(scoreRecordDO.getTotalScore());
-        scoreRecordDTO.setCreateBy(scoreRecordDO.getCreateBy());
-        scoreRecordDTO.setCreateTime(scoreRecordDO.getCreateTime().toString());
-        scoreRecordDTO.setUpdateBy(scoreRecordDO.getUpdateBy());
-        scoreRecordDTO.setUpdateTime(scoreRecordDO.getUpdateTime().toString());
+        scoreRecordDTO.setRecordId(scoreRecord.getRecordId());
+        scoreRecordDTO.setStudentId(scoreRecord.getStudentId());
+        scoreRecordDTO.setCourseId(scoreRecord.getCourseId());
+        scoreRecordDTO.setUsualScore(scoreRecord.getUsualScore());
+        scoreRecordDTO.setFinalScore(scoreRecord.getFinalScore());
+        scoreRecordDTO.setTotalScore(scoreRecord.getTotalScore());
+        scoreRecordDTO.setCreateBy(scoreRecord.getCreateBy());
+        scoreRecordDTO.setCreateTime(scoreRecord.getCreateTime().toString());
+        scoreRecordDTO.setUpdateBy(scoreRecord.getUpdateBy());
+        scoreRecordDTO.setUpdateTime(scoreRecord.getUpdateTime().toString());
         return scoreRecordDTO;
     }
 }

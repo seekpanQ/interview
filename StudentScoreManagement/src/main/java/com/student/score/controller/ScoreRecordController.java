@@ -33,7 +33,7 @@ public class ScoreRecordController {
      * @param request 请求对象
      * @return 返回结果
      */
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<RestResult<ScoreRecordDTO>> addScoreRecord(@Validated @RequestBody ScoreRecordRequest request) {
         log.info("新增成绩记录请求: {}", request);
         ScoreRecordDTO result = scoreRecordService.addScoreRecord(request);
@@ -46,7 +46,7 @@ public class ScoreRecordController {
      * @param request 请求对象
      * @return 返回结果
      */
-    @PutMapping
+    @PutMapping("/modify")
     public ResponseEntity<RestResult<ScoreRecordDTO>> updateScoreRecord(@Validated @RequestBody ScoreRecordUpdateRequest request) {
         log.info("修改成绩记录请求: {}", request);
         ScoreRecordDTO result = scoreRecordService.updateScoreRecord(request);
@@ -59,7 +59,7 @@ public class ScoreRecordController {
      * @param request 请求对象
      * @return 返回结果
      */
-    @DeleteMapping
+    @DeleteMapping("/delete")
     public ResponseEntity<RestResult<Void>> deleteScoreRecord(@Validated @RequestBody ScoreRecordDeleteRequest request) {
         log.info("删除成绩记录请求: {}", request);
         scoreRecordService.deleteScoreRecord(request.getRecordId());
@@ -72,7 +72,7 @@ public class ScoreRecordController {
      * @param request 请求对象
      * @return 返回结果
      */
-    @GetMapping
+    @PostMapping("/list")
     public ResponseEntity<RestResult<List<ScoreRecordDTO>>> getScoreRecordList(@Validated @RequestBody ScoreRecordListRequest request) {
         log.info("查询成绩记录列表请求: {}", request);
         List<ScoreRecordDTO> result = scoreRecordService.getScoreRecordList(request);

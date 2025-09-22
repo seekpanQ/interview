@@ -1,6 +1,5 @@
 package com.student.score.repository;
 
-import com.student.score.entity.GPAStatisticsDO;
 import com.student.score.entity.GpaStatistics;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +25,5 @@ public interface GpaStatisticsRepository extends JpaRepository<GpaStatistics, In
     @Query("SELECT gs FROM GpaStatistics gs WHERE gs.studentId = ?1 AND (?2 IS NULL OR gs.semester = ?2)")
     List<GpaStatistics> findByStudentIdAndSemester(Integer studentId, String semester);
 
-    List<GPAStatisticsDO> findByStudentIdOrderByCreateTimeDesc(Integer studentId);
+    List<GpaStatistics> findByStudentIdOrderByCreateTimeDesc(Integer studentId);
 }

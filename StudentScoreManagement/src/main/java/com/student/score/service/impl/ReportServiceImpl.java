@@ -207,16 +207,16 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Object generateSemesterAnalysis(String semester) {
         // 查询该学期的所有成绩记录
-        List<ScoreRecordDO> allRecords = scoreRecordRepository.findAll().stream().filter(r -> r.getCreateTime().toString().startsWith(semester)).collect(Collectors.toList());
+        List<ScoreRecord> allRecords = scoreRecordRepository.findAll().stream().filter(r -> r.getCreateTime().toString().startsWith(semester)).collect(Collectors.toList());
         if (allRecords.isEmpty()) {
             // 表示没有找到对应记录
             return null;
         }
         // 计算各项指标
-        BigDecimal totalSum = allRecords.stream().map(ScoreRecordDO::getTotalScore).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalSum = allRecords.stream().map(ScoreRecord::getTotalScore).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal avgScore = totalSum.divide(BigDecimal.valueOf(allRecords.size()), 2, RoundingMode.HALF_UP);
-        BigDecimal maxScore = allRecords.stream().map(ScoreRecordDO::getTotalScore).max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-        BigDecimal minScore = allRecords.stream().map(ScoreRecordDO::getTotalScore).min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+        BigDecimal maxScore = allRecords.stream().map(ScoreRecord::getTotalScore).max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
+        BigDecimal minScore = allRecords.stream().map(ScoreRecord::getTotalScore).min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
         SemesterSummaryResponse summary = new SemesterSummaryResponse();
         summary.setSemester(semester);
         summary.setAvgScore(avgScore);

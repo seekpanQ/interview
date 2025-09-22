@@ -9,9 +9,8 @@ import com.student.score.dto.response.ClassRankingResponse;
 import com.student.score.dto.response.CourseRankingResponse;
 import com.student.score.dto.response.GPAResponse;
 import com.student.score.dto.response.StudentGPAListResponse;
-import com.student.score.entity.GPAStatisticsDO;
 import com.student.score.entity.GpaStatistics;
-import com.student.score.entity.ScoreRecordDO;
+import com.student.score.entity.ScoreRecord;
 import com.student.score.repository.GpaStatisticsRepository;
 import com.student.score.repository.ScoreRecordRepository;
 import com.student.score.service.StatisticalAnalysisService;
@@ -45,25 +44,25 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
     @Override
     public RestResult<ClassRankingResponse> getClassRanking(ClassRankingRequest request) {
         // 查询该班所有学生的成绩记录
-        List<ScoreRecordDO> records = scoreRecordRepository.findScoreRecordsByClassIdAndSemester(request.getClassId(), request.getSemester());
+        List<ScoreRecord> records = scoreRecordRepository.findScoreRecordsByClassIdAndSemester(request.getClassId(), request.getSemester());
 
         if (records.isEmpty()) {
             return RestResult.error("000001", "暂无成绩数据");
         }
 
         // 将成绩按学生分组并计算总分
-        Map<Integer, List<ScoreRecordDO>> groupedByStudent = records.stream()
-                .collect(Collectors.groupingBy(ScoreRecordDO::getStudentId));
+        Map<Integer, List<ScoreRecord>> groupedByStudent = records.stream()
+                .collect(Collectors.groupingBy(ScoreRecord::getStudentId));
 
         // 构建排名数据
         List<ClassRankingResponse.StudentScoreRankItem> items = new ArrayList<>();
-        for (Map.Entry<Integer, List<ScoreRecordDO>> entry : groupedByStudent.entrySet()) {
+        for (Map.Entry<Integer, List<ScoreRecord>> entry : groupedByStudent.entrySet()) {
             Integer studentId = entry.getKey();
-            List<ScoreRecordDO> studentRecords = entry.getValue();
+            List<ScoreRecord> studentRecords = entry.getValue();
 
             // 计算该学生总分
             BigDecimal totalScore = studentRecords.stream()
-                    .map(ScoreRecordDO::getTotalScore)
+                    .map(ScoreRecord::getTotalScore)
                     .filter(Objects::nonNull)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -94,7 +93,7 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
     @Override
     public RestResult<CourseRankingResponse> getCourseRanking(CourseRankingRequest request) {
         // 查询该课程所有学生的成绩记录
-        List<ScoreRecordDO> records = scoreRecordRepository.findScoreRecordsByCourseIdAndSemester(request.getCourseId(), request.getSemester());
+        List<ScoreRecord> records = scoreRecordRepository.findScoreRecordsByCourseIdAndSemester(request.getCourseId(), request.getSemester());
 
         if (records.isEmpty()) {
             return RestResult.error("000001", "暂无成绩数据");
@@ -130,7 +129,7 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
     public RestResult<GPAResponse> calculateStudentGPA(CalculateGPARequest request) {
         try {
             // 获取该学生在该学期的所有成绩记录
-            List<ScoreRecordDO> records = scoreRecordRepository.findScoreRecordsByStudentIdAndSemester(request.getStudentId(), request.getSemester());
+            List<ScoreRecord> records = scoreRecordRepository.findScoreRecordsByStudentIdAndSemester(request.getStudentId(), request.getSemester());
 
             if (records.isEmpty()) {
                 return RestResult.error("000001", "暂无成绩数据");
@@ -138,7 +137,7 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
 
             // 获取课程信息用于获取学分
             Set<Integer> courseIds = records.stream()
-                    .map(ScoreRecordDO::getCourseId)
+                    .map(ScoreRecord::getCourseId)
                     .collect(Collectors.toSet());
 
             // 这里假设有一个方法可以获取课程信息，实际开发中应注入CourseInfoRepository进行查询
@@ -148,7 +147,7 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
             BigDecimal weightedSum = BigDecimal.ZERO;
             BigDecimal totalCredits = BigDecimal.ZERO;
 
-            for (ScoreRecordDO record : records) {
+            for (ScoreRecord record : records) {
                 // 假设每个record都有对应的courseId和totalScore，以及课程的credits字段
                 // 在真实环境中需要通过courseId从CourseInfoDO中查出credits
                 // 此处为了演示仅使用一个固定值代替
@@ -205,7 +204,7 @@ public class StatisticalAnalysisServiceImpl implements StatisticalAnalysisServic
 
     @Override
     public RestResult<StudentGPAListResponse> getStudentGPAs(GetGPAsByStudentRequest request) {
-        List<GPAStatisticsDO> records = gpaStatisticsRepository.findByStudentIdOrderByCreateTimeDesc(request.getStudentId());
+        List<GpaStatistics> records = gpaStatisticsRepository.findByStudentIdOrderByCreateTimeDesc(request.getStudentId());
 
         StudentGPAListResponse response = new StudentGPAListResponse();
         List<StudentGPAListResponse.GPARecord> gpaRecords = records.stream()
